@@ -1,6 +1,6 @@
 # Concurrent programing
 
-## Workgin Group
+## Working Group
 
 | Name Surname (initials) | GUID                                     |
 | ----------------------- | ---------------------------------------- |
