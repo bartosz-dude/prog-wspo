@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/ReactiveInteractiveUserInterface/">
+    <Project Path="ReactiveInteractiveUserInterface/BusinessLogic/BusinessLogic.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/BusinessLogicTest/BusinessLogicTest.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/Data/Data.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/DataTest/DataTest.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/PresentationModel/PresentationModel.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/PresentationModelTest/PresentationModelTest.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/PresentationViewModel/PresentationViewModel.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/PresentationViewModelTest/PresentationViewModelTest.csproj" />
+  </Folder>
+</Solution>
