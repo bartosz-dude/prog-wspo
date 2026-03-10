@@ -1,0 +1,64 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Wine: .NET Clean",
+			"type": "shell",
+			"command": "wine",
+			"args": ["dotnet", "clean"],
+			"options": {
+				"env": {
+					"WINEDEBUG": "-all"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"clear": true,
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Wine: .NET Build",
+			"type": "shell",
+			"dependsOn": "Wine: .NET Clean",
+			"command": "wine",
+			"args": ["dotnet", "build"],
+			"options": {
+				"env": {
+					"WINEDEBUG": "-all"
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Wine: Run GUI App",
+			"type": "shell",
+			"command": "wine",
+			"args": [
+				"dotnet",
+				"run",
+				"--project",
+				"ReactiveInteractiveUserInterface/GraphicalUserInterface"
+			],
+			"options": {
+				"env": {
+					"WINEDEBUG": "-all"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"focus": true,
+				"panel": "dedicated"
+			}
+		}
+	]
+}
