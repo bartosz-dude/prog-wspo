@@ -1,4 +1,4 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/ReactiveInteractiveUserInterface/">
     <Project Path="ReactiveInteractiveUserInterface/BusinessLogic/BusinessLogic.csproj" />
     <Project Path="ReactiveInteractiveUserInterface/BusinessLogicTest/BusinessLogicTest.csproj" />
@@ -8,5 +8,6 @@
     <Project Path="ReactiveInteractiveUserInterface/PresentationModelTest/PresentationModelTest.csproj" />
     <Project Path="ReactiveInteractiveUserInterface/PresentationViewModel/PresentationViewModel.csproj" />
     <Project Path="ReactiveInteractiveUserInterface/PresentationViewModelTest/PresentationViewModelTest.csproj" />
+    <Project Path="ReactiveInteractiveUserInterface/GraphicalUserInterface/PresentationView.csproj" />
   </Folder>
 </Solution>
