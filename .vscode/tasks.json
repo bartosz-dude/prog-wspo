@@ -6,8 +6,7 @@
 		{
 			"label": "Wine: .NET Clean",
 			"type": "shell",
-			"command": "wine",
-			"args": ["dotnet", "clean"],
+			"linux": { "command": "wine", "args": ["dotnet", "clean"] },
 			"options": {
 				"env": {
 					"WINEDEBUG": "-all"
@@ -23,8 +22,7 @@
 			"label": "Wine: .NET Build",
 			"type": "shell",
 			"dependsOn": "Wine: .NET Clean",
-			"command": "wine",
-			"args": ["dotnet", "build"],
+			"linux": { "command": "wine", "args": ["dotnet", "build"] },
 			"options": {
 				"env": {
 					"WINEDEBUG": "-all"
@@ -42,13 +40,15 @@
 		{
 			"label": "Wine: Run GUI App",
 			"type": "shell",
-			"command": "wine",
-			"args": [
-				"dotnet",
-				"run",
-				"--project",
-				"ReactiveInteractiveUserInterface/GraphicalUserInterface"
-			],
+			"linux": {
+				"command": "wine",
+				"args": [
+					"dotnet",
+					"run",
+					"--project",
+					"ReactiveInteractiveUserInterface/GraphicalUserInterface"
+				]
+			},
 			"options": {
 				"env": {
 					"WINEDEBUG": "-all"
