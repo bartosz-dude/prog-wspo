@@ -19,6 +19,21 @@
 			}
 		},
 		{
+			"label": "Wine: .NET Tests",
+			"type": "shell",
+			"linux": { "command": "wine", "args": ["dotnet", "test"] },
+			"options": {
+				"env": {
+					"WINEDEBUG": "-all"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"clear": true,
+				"panel": "shared"
+			}
+		},
+		{
 			"label": "Wine: .NET Build",
 			"type": "shell",
 			"dependsOn": "Wine: .NET Clean",
