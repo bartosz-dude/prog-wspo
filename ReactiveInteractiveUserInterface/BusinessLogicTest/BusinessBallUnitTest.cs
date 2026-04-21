@@ -30,7 +30,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     {
       public double Radius { get; } = 20.0;
       public double Weight { get; } = 10.0;
-      public Data.IVector Position { get; private set; }
+      public Data.IVector Position { get; set; }
       public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
       public event EventHandler<Data.IVector>? NewPositionNotification;

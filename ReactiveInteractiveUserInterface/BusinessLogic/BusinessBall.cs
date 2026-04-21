@@ -18,7 +18,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     public Ball(Data.IBall ball)
     {
       ball.NewPositionNotification += RaisePositionChangeEvent;
-      Radius = ball.Radius;
+      Radius = ball.Radius * 2;
     }
 
     #region IBall

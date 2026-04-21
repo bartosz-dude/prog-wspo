@@ -14,10 +14,10 @@ namespace TP.ConcurrentProgramming.Data
   {
     #region ctor
 
-    public double Radius { get; } = 20.0;
+    public double Radius { get; } = 10.0;
     public double Weight { get; } = 10.0;
     public IVector Velocity { get; set; }
-    public IVector Position { get; private set; }
+    public IVector Position { get; set; }
 
     internal Ball(Vector initialPosition, Vector initialVelocity)
     {

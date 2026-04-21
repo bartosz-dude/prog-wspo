@@ -112,12 +112,45 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         double dx = ball.Position.x - other.Position.x;
         double dy = ball.Position.y - other.Position.y;
         double distance = Math.Sqrt(dx * dx + dy * dy);
+        double minDistance = ball.Radius + other.Radius;
 
-        if (distance <= 20.0)
+        if (distance <= minDistance)
         {
-          var temp = ball.Velocity;
-          ball.Velocity = other.Velocity;
-          other.Velocity = temp;
+          double overlap = minDistance - distance;
+          double nx = dx / distance; // normal X
+          double ny = dy / distance; // normal Y
+
+          // overlap move
+          double moveX = nx * overlap / 2.0;
+          double moveY = ny * overlap / 2.0;
+
+          ball.Position = new Data.Vector(ball.Position.x + moveX, ball.Position.y + moveY);
+          other.Position = new Data.Vector(other.Position.x - moveX, other.Position.y - moveY);
+
+          // relative velocity
+          double vRelX = ball.Velocity.x - other.Velocity.x;
+          double vRelY = ball.Velocity.y - other.Velocity.y;
+
+          // velocity along normal
+          double vRelNormal = vRelX * nx + vRelY * ny;
+
+          // already moving away
+          if (vRelNormal > 0) continue;
+
+          // scalar impulse to transfer for velocity based on weight transfer
+          // j = -(1 + e) * v_rel_dot_n / (1/m1 + 1/m2)
+          double j = -(1 + 1.0) * vRelNormal;
+          j /= (1.0 / ball.Weight + 1.0 / other.Weight);
+
+          ball.Velocity = new Data.Vector(
+              ball.Velocity.x + (j * nx) / ball.Weight,
+              ball.Velocity.y + (j * ny) / ball.Weight
+          );
+
+          other.Velocity = new Data.Vector(
+              other.Velocity.x - (j * nx) / other.Weight,
+              other.Velocity.y - (j * ny) / other.Weight
+          );
         }
       }
     }

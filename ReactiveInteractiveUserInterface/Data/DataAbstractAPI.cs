@@ -60,6 +60,6 @@ namespace TP.ConcurrentProgramming.Data
     IVector Velocity { get; set; }
     double Radius { get; }
     double Weight { get; }
-    IVector Position { get; }
+    IVector Position { get; set; }
   }
 }
