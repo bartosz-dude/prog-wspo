@@ -9,6 +9,13 @@
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
+    <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" HorizontalAlignment="Center">
+        <Label Content="Ball count:" VerticalAlignment="Center"/>
+        <TextBox Text="{Binding NumberOfBalls, UpdateSourceTrigger=PropertyChanged}" Width="50" Margin="5" VerticalAlignment="Center"/>
+        <Button Content="Start" Command="{Binding StartCommand}" Width="80" Margin="5"/>
+    </StackPanel>
+
     <Border BorderThickness="4" BorderBrush="Green" Height="420" Width="400">
         <ItemsControl ItemsSource="{Binding Balls}">
             <ItemsControl.ItemsPanel>
@@ -29,4 +36,5 @@
             </ItemsControl.ItemContainerStyle>
         </ItemsControl>
     </Border>
+    </DockPanel>
 </Window>
