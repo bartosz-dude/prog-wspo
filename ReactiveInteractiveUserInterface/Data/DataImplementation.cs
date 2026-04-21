@@ -26,20 +26,47 @@ namespace TP.ConcurrentProgramming.Data
 
     #region DataAbstractAPI
 
-    public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
+    private CancellationTokenSource? _cts;
+
+    public override void Start(int numberOfBalls, double width, double height, Action<IVector, IBall> upperLayerHandler)
     {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(DataImplementation));
-      if (upperLayerHandler == null)
-        throw new ArgumentNullException(nameof(upperLayerHandler));
+      _cts = new CancellationTokenSource();
       Random random = new Random();
+      double radius = 1.0;
+
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-        Ball newBall = new(startingPosition, startingPosition);
-        upperLayerHandler(startingPosition, newBall);
+        Vector pos = new Vector(
+            random.NextDouble() * (width - 2 * radius),
+            random.NextDouble() * (height - 2 * radius)
+        );
+        Vector vel = new Vector(random.NextDouble() * 2 - 1, random.NextDouble() * 2 - 1);
+        Ball newBall = new Ball(pos, vel);
+
         BallsList.Add(newBall);
+        upperLayerHandler(pos, newBall);
+
+        Task.Run(async () =>
+        {
+          while (!_cts.Token.IsCancellationRequested)
+          {
+            newBall.Move();
+            await Task.Delay(15);
+          }
+        });
       }
+      // if (Disposed)
+      //   throw new ObjectDisposedException(nameof(DataImplementation));
+      // if (upperLayerHandler == null)
+      //   throw new ArgumentNullException(nameof(upperLayerHandler));
+      // Random random = new Random();
+      // for (int i = 0; i < numberOfBalls; i++)
+      // {
+      //   Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
+      //   Ball newBall = new(startingPosition, startingPosition);
+      //   upperLayerHandler(startingPosition, newBall);
+      //   BallsList.Add(newBall);
+      // }
     }
 
     #endregion DataAbstractAPI
@@ -81,8 +108,8 @@ namespace TP.ConcurrentProgramming.Data
 
     private void Move(object? x)
     {
-      foreach (Ball item in BallsList)
-        item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10));
+      // foreach (Ball item in BallsList)
+      // item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10));
     }
 
     #endregion private
