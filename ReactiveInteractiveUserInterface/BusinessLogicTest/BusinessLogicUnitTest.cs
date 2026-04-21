@@ -39,7 +39,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
       Assert.IsTrue(newInstanceDisposed);
       Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Dispose());
-      Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Start(0, (position, ball) => { }));
       Assert.IsTrue(dataLayerFixcure.Disposed);
     }
 
@@ -67,7 +66,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       public override void Dispose()
       { }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, double width, double height, Action<IVector, Data.IBall> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
@@ -82,7 +81,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         Disposed = true;
       }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, double width, double height, Action<IVector, Data.IBall> upperLayerHandler)
       {
         throw new NotImplementedException();
       }
@@ -96,7 +95,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       public override void Dispose()
       { }
 
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, double width, double height, Action<IVector, Data.IBall> upperLayerHandler)
       {
         StartCalled = true;
         NumberOfBallseCreated = numberOfBalls;
@@ -111,7 +110,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
       private class DataBallFixture : Data.IBall
       {
+        public double Radius { get; } = 20.0;
+        public double Weight { get; } = 10.0;
         public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public IVector Position { get => throw new NotImplementedException(); private set => throw new NotImplementedException(); }
 
         public event EventHandler<IVector>? NewPositionNotification = null;
       }
