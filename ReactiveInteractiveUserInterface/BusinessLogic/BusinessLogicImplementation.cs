@@ -57,7 +57,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         dataBall.NewPositionNotification += (sender, pos) =>
         {
-          HandleBallLogic((Data.IBall)sender);
+          Task.Run(async () => HandleBallLogic((Data.IBall)sender));
         };
 
         upperLayerHandler(new Position(startingPos.x, startingPos.y), bussinessBall);
@@ -71,11 +71,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
     private void HandleBallLogic(Data.IBall ball)
     {
-      lock (_collisionLock)
-      {
-        CheckWallCollision(ball);
-        CheckBallCollision(ball);
-      }
+      // lock (_collisionLock)
+      // {
+      CheckWallCollision(ball);
+      CheckBallCollision(ball);
+      // }
     }
 
     private void CheckWallCollision(Data.IBall ball)
@@ -83,12 +83,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       var dims = GetDimensions;
       double diameter = ball.Radius * 2;
 
+
+
       // horizontal box collision
       if (ball.Position.x <= 0 && ball.Velocity.x < 0)
       {
         ball.Velocity = new Data.Vector(-ball.Velocity.x, ball.Velocity.y);
       }
-      else if (ball.Position.x + diameter >= dims.TableWidth && ball.Velocity.x > 0)
+      else if ((ball.Position.x + diameter) >= dims.TableWidth && ball.Velocity.x > 0)
       {
         ball.Velocity = new Data.Vector(-ball.Velocity.x, ball.Velocity.y);
       }
@@ -98,9 +100,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       {
         ball.Velocity = new Data.Vector(ball.Velocity.x, -ball.Velocity.y);
       }
-      else if (ball.Position.y + diameter >= dims.TableHeight && ball.Velocity.y > 0)
+      else if ((ball.Position.y + diameter) >= dims.TableHeight && ball.Velocity.y > 0)
       {
         ball.Velocity = new Data.Vector(ball.Velocity.x, -ball.Velocity.y);
+      }
+
+      if (ball.Position.x < (-diameter) || ball.Position.x > (dims.TableWidth + diameter) ||
+    ball.Position.y < (-diameter) || ball.Position.y > (dims.TableHeight + diameter))
+      {
+        Console.Error.WriteLine($"Ball outside of the walls " + $"Position: ({ball.Position.x:F2}, {ball.Position.y:F2}), " + $"Table Size: {dims.TableWidth}x{dims.TableHeight}");
+        Environment.FailFast($"Ball outside of the walls " + $"Position: ({ball.Position.x:F2}, {ball.Position.y:F2}), " + $"Table Size: {dims.TableWidth}x{dims.TableHeight}");
       }
     }
     private void CheckBallCollision(Data.IBall ball)
@@ -108,49 +117,59 @@ namespace TP.ConcurrentProgramming.BusinessLogic
       foreach (var other in _dataBalls)
       {
         if (ReferenceEquals(ball, other)) continue;
+        var firstLock = ball.GetHashCode() < other.GetHashCode() ? ball : other;
+        var secondLock = ball.GetHashCode() < other.GetHashCode() ? other : ball;
 
-        double dx = ball.Position.x - other.Position.x;
-        double dy = ball.Position.y - other.Position.y;
-        double distance = Math.Sqrt(dx * dx + dy * dy);
-        double minDistance = ball.Radius + other.Radius;
-
-        if (distance <= minDistance)
+        lock (firstLock)
         {
-          double overlap = minDistance - distance;
-          double nx = dx / distance; // normal X
-          double ny = dy / distance; // normal Y
+          lock (secondLock)
+          {
+            double dx = ball.Position.x - other.Position.x;
+            double dy = ball.Position.y - other.Position.y;
+            double distance = Math.Sqrt(dx * dx + dy * dy);
+            double minDistance = ball.Radius + other.Radius;
 
-          // overlap move
-          double moveX = nx * overlap / 2.0;
-          double moveY = ny * overlap / 2.0;
+            if (distance <= minDistance)
+            {
+              if (distance == 0) distance = 0.1;
 
-          ball.Position = new Data.Vector(ball.Position.x + moveX, ball.Position.y + moveY);
-          other.Position = new Data.Vector(other.Position.x - moveX, other.Position.y - moveY);
+              double overlap = minDistance - distance;
+              double nx = dx / distance; // normal X
+              double ny = dy / distance; // normal Y
 
-          // relative velocity
-          double vRelX = ball.Velocity.x - other.Velocity.x;
-          double vRelY = ball.Velocity.y - other.Velocity.y;
+              // overlap move
+              double moveX = nx * overlap / 2.0;
+              double moveY = ny * overlap / 2.0;
 
-          // velocity along normal
-          double vRelNormal = vRelX * nx + vRelY * ny;
+              ball.Position = new Data.Vector(ball.Position.x + moveX, ball.Position.y + moveY);
+              other.Position = new Data.Vector(other.Position.x - moveX, other.Position.y - moveY);
 
-          // already moving away
-          if (vRelNormal > 0) continue;
+              // relative velocity
+              double vRelX = ball.Velocity.x - other.Velocity.x;
+              double vRelY = ball.Velocity.y - other.Velocity.y;
 
-          // scalar impulse to transfer for velocity based on weight transfer
-          // j = -(1 + e) * v_rel_dot_n / (1/m1 + 1/m2)
-          double j = -(1 + 1.0) * vRelNormal;
-          j /= (1.0 / ball.Weight + 1.0 / other.Weight);
+              // velocity along normal
+              double vRelNormal = vRelX * nx + vRelY * ny;
 
-          ball.Velocity = new Data.Vector(
-              ball.Velocity.x + (j * nx) / ball.Weight,
-              ball.Velocity.y + (j * ny) / ball.Weight
-          );
+              // already moving away
+              if (vRelNormal > 0) continue;
 
-          other.Velocity = new Data.Vector(
-              other.Velocity.x - (j * nx) / other.Weight,
-              other.Velocity.y - (j * ny) / other.Weight
-          );
+              // scalar impulse to transfer for velocity based on weight transfer
+              // j = -(1 + e) * v_rel_dot_n / (1/m1 + 1/m2)
+              double j = -(1 + 1.0) * vRelNormal;
+              j /= (1.0 / ball.Weight + 1.0 / other.Weight);
+
+              ball.Velocity = new Data.Vector(
+                  ball.Velocity.x + (j * nx) / ball.Weight,
+                  ball.Velocity.y + (j * ny) / ball.Weight
+              );
+
+              other.Velocity = new Data.Vector(
+                  other.Velocity.x - (j * nx) / other.Weight,
+                  other.Velocity.y - (j * ny) / other.Weight
+              );
+            }
+          }
         }
       }
     }

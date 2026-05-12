@@ -8,20 +8,87 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Diagnostics;
+
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
 {
   [TestClass]
   public class BallUnitTest
   {
+    // TODO add check of how many times ball process was run
     [TestMethod]
     public void MoveTestMethod()
     {
+      Console.WriteLine("MoveTestMethod");
       DataBallFixture dataBallFixture = new DataBallFixture();
       Ball newInstance = new(dataBallFixture);
       int numberOfCallBackCalled = 0;
       newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); Assert.IsNotNull(position); numberOfCallBackCalled++; };
       dataBallFixture.Move();
       Assert.AreEqual<int>(1, numberOfCallBackCalled);
+    }
+
+    [TestMethod]
+    public void AsyncHighPerformanceBallProcessCountTest()
+    {
+      int numberOfBalls = 1000;
+      int testDurationMs = 10000;
+
+      long[] ballInvocationCounts = new long[numberOfBalls];
+
+      using CancellationTokenSource cts = new();
+      List<DataBallFixture> balls = new();
+
+      for (int i = 0; i < numberOfBalls; i++)
+      {
+        var ball = new DataBallFixture();
+
+        int index = i;
+
+        ball.NewPositionNotification += (sender, pos) =>
+        {
+          Interlocked.Increment(ref ballInvocationCounts[index]);
+        };
+        balls.Add(ball);
+      }
+
+      Stopwatch timer = Stopwatch.StartNew();
+
+      List<Task> tasks = new();
+      foreach (var newBall in balls)
+      {
+        tasks.Add(Task.Run(async () =>
+        {
+          while (!cts.Token.IsCancellationRequested)
+          {
+            newBall.Move();
+            await Task.Delay(15);
+          }
+        }, cts.Token));
+      }
+
+      Thread.Sleep(testDurationMs);
+      cts.Cancel();
+
+      Task.WaitAll(tasks.ToArray(), 1000);
+      timer.Stop();
+
+      long totalInvocations = ballInvocationCounts.Sum();
+      int ballsWithZeroCounts = ballInvocationCounts.Count(count => count == 0);
+      double averageCount = ballInvocationCounts.Average();
+
+      Console.WriteLine($"Total balls: {numberOfBalls}");
+      Console.WriteLine($"Total logic cycles: {totalInvocations}");
+      Console.WriteLine($"Average cycles per ball: {averageCount:F2}");
+      Console.WriteLine($"Balls never processed: {ballsWithZeroCounts}");
+
+      Assert.AreEqual(0, ballsWithZeroCounts, "Every ball should have been processed at least once.");
+
+      double minExpected = (testDurationMs / 30.0);
+      foreach (var count in ballInvocationCounts)
+      {
+        Assert.IsTrue(count > 0, "A ball was missed by the scheduler.");
+      }
     }
 
     #region testing instrumentation

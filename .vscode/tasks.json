@@ -21,7 +21,15 @@
 		{
 			"label": "Wine: .NET Tests",
 			"type": "shell",
-			"linux": { "command": "wine", "args": ["dotnet", "test"] },
+			"linux": {
+				"command": "wine",
+				"args": [
+					"dotnet",
+					"test",
+					"--logger",
+					"\"console;verbosity=detailed\""
+				]
+			},
 			"options": {
 				"env": {
 					"WINEDEBUG": "-all"
@@ -37,7 +45,10 @@
 			"label": "Wine: .NET Build",
 			"type": "shell",
 			"dependsOn": "Wine: .NET Clean",
-			"linux": { "command": "wine", "args": ["dotnet", "build"] },
+			"linux": {
+				"command": "wine",
+				"args": ["dotnet", "build"]
+			},
 			"options": {
 				"env": {
 					"WINEDEBUG": "-all"

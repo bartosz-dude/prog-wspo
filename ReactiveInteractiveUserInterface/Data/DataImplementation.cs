@@ -32,15 +32,40 @@ namespace TP.ConcurrentProgramming.Data
     {
       _cts = new CancellationTokenSource();
       Random random = new Random();
-      double radius = 1.0;
+      double radius = 10.0;
+      double minDistance = radius * 2;
 
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector pos = new Vector(
-            random.NextDouble() * (width - 2 * radius),
-            random.NextDouble() * (height - 2 * radius)
-        );
+        Vector pos;
+        bool overlapping;
+        int attempts = 0;
+
+        do
+        {
+          overlapping = false;
+          pos = new Vector(
+              random.NextDouble() * (width - 2 * radius) + radius,
+              random.NextDouble() * (height - 2 * radius) + radius
+          );
+
+          foreach (var ball in BallsList)
+          {
+            double dx = pos.x - ball.Position.x;
+            double dy = pos.y - ball.Position.y;
+            double distance = Math.Sqrt(dx * dx + dy * dy);
+
+            if (distance < minDistance)
+            {
+              overlapping = true;
+              break;
+            }
+          }
+          attempts++;
+        } while (overlapping && attempts < 100);
+
         Vector vel = new Vector(random.NextDouble() * 2 - 1, random.NextDouble() * 2 - 1);
+
         Ball newBall = new Ball(pos, vel);
 
         BallsList.Add(newBall);
