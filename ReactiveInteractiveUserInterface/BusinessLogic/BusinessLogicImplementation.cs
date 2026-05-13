@@ -120,18 +120,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         var firstLock = ball.GetHashCode() < other.GetHashCode() ? ball : other;
         var secondLock = ball.GetHashCode() < other.GetHashCode() ? other : ball;
 
-        lock (firstLock)
-        {
-          lock (secondLock)
-          {
-            double dx = ball.Position.x - other.Position.x;
-            double dy = ball.Position.y - other.Position.y;
-            double distance = Math.Sqrt(dx * dx + dy * dy);
-            double minDistance = ball.Radius + other.Radius;
+        double dx = ball.Position.x - other.Position.x;
+        double dy = ball.Position.y - other.Position.y;
+        double distance = Math.Sqrt(dx * dx + dy * dy);
+        double minDistance = ball.Radius + other.Radius;
 
-            if (distance <= minDistance)
+        if (distance <= minDistance)
+        {
+          if (distance == 0) distance = 0.1;
+
+          lock (firstLock)
+          {
+            lock (secondLock)
             {
-              if (distance == 0) distance = 0.1;
 
               double overlap = minDistance - distance;
               double nx = dx / distance; // normal X
