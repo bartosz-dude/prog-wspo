@@ -27,48 +27,34 @@ namespace TP.ConcurrentProgramming.Data
     #region DataAbstractAPI
 
     private CancellationTokenSource? _cts;
+    private bool _disposed = false;
+    private readonly List<Ball> _ballsList = new();
+    private DiagnosticsLogger? _logger;
 
     public override void Start(int numberOfBalls, double width, double height, Action<IVector, IBall> upperLayerHandler)
     {
       _cts = new CancellationTokenSource();
+      _logger = new DiagnosticsLogger();
       Random random = new Random();
+
       double radius = 10.0;
       double minDistance = radius * 2;
 
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector pos;
-        bool overlapping;
-        int attempts = 0;
+        Vector pos = new Vector(
+          random.NextDouble() * (width - 2 * radius) + radius,
+          random.NextDouble() * (height - 2 * radius) + radius
+        );
+        // Vector pos = new Vector(
+        //     random.NextDouble() * (width - 25) + 10,
+        //     random.NextDouble() * (height - 25) + 10
+        // );
+        Vector vel = new Vector(random.NextDouble() * 40 - 2, random.NextDouble() * 40 - 2);
 
-        do
-        {
-          overlapping = false;
-          pos = new Vector(
-              random.NextDouble() * (width - 2 * radius) + radius,
-              random.NextDouble() * (height - 2 * radius) + radius
-          );
+        Ball newBall = new Ball(i, pos, vel);
+        _ballsList.Add(newBall);
 
-          foreach (var ball in BallsList)
-          {
-            double dx = pos.x - ball.Position.x;
-            double dy = pos.y - ball.Position.y;
-            double distance = Math.Sqrt(dx * dx + dy * dy);
-
-            if (distance < minDistance)
-            {
-              overlapping = true;
-              break;
-            }
-          }
-          attempts++;
-        } while (overlapping && attempts < 100);
-
-        Vector vel = new Vector(random.NextDouble() * 2 - 1, random.NextDouble() * 2 - 1);
-
-        Ball newBall = new Ball(pos, vel);
-
-        BallsList.Add(newBall);
         upperLayerHandler(pos, newBall);
 
         Task.Run(async () =>
@@ -76,23 +62,14 @@ namespace TP.ConcurrentProgramming.Data
           while (!_cts.Token.IsCancellationRequested)
           {
             newBall.Move();
+            _logger?.LogBallState(newBall.Id, newBall.Position, newBall.Velocity);
+
             await Task.Delay(15);
           }
         });
       }
-      // if (Disposed)
-      //   throw new ObjectDisposedException(nameof(DataImplementation));
-      // if (upperLayerHandler == null)
-      //   throw new ArgumentNullException(nameof(upperLayerHandler));
-      // Random random = new Random();
-      // for (int i = 0; i < numberOfBalls; i++)
-      // {
-      //   Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-      //   Ball newBall = new(startingPosition, startingPosition);
-      //   upperLayerHandler(startingPosition, newBall);
-      //   BallsList.Add(newBall);
-      // }
     }
+
 
     #endregion DataAbstractAPI
 

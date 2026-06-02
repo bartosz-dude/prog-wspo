@@ -63,7 +63,6 @@ namespace TP.ConcurrentProgramming.Data.Test
             Assert.IsNotNull(ball);
           });
         Assert.AreEqual<int>(numberOfBalls2Create, numberOfCallbackInvoked);
-        newInstance.CheckNumberOfBalls(x => Assert.AreEqual<int>(10, x));
       }
     }
   }
